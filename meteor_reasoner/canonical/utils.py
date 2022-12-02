@@ -262,6 +262,7 @@ def build_right_ruler_intervals(right_interval_range, CR):
 
 
 def find_right_period(D, right_interval_range, CR):
+
     big_ruler_intervals,  starting_ruler_interval = build_right_ruler_intervals(right_interval_range, CR)
     big_ruler_intervals = big_ruler_intervals[big_ruler_intervals.index(starting_ruler_interval):]
     len_big_ruler_intervals = len(big_ruler_intervals)
@@ -274,6 +275,7 @@ def find_right_period(D, right_interval_range, CR):
             second_index = big_ruler_intervals.index(Interval(first.left_value + CR.w, first.left_value + CR.w, False, False))
         except:
             break
+
         first_interval = big_ruler_intervals[i:second_index+1]
 
         for k in range(i+1, len_big_ruler_intervals):
@@ -285,6 +287,7 @@ def find_right_period(D, right_interval_range, CR):
                     Interval(first.left_value + CR.w, first.left_value + CR.w, False, False))
             except:
                 break
+
             second_interval = big_ruler_intervals[k: second_index+1]
             if has_same_pattern(second_interval, first_interval) and has_same_facts(first_interval, second_interval, D):
                 varrho_right_dict = defaultdict(list)
@@ -318,10 +321,9 @@ def entail(fact, D):
                 return False
 
 
-def find_periods(CR, fact=None):
+def find_periods(CR):
     left_period, left_len = defaultdict(list), 0
     right_period, right_len = defaultdict(list), 0
-    cnt = 0
     number_mat = 0
     while True:
         common_fragment = CommonFragment(CR.base_interval)
@@ -341,6 +343,7 @@ def find_periods(CR, fact=None):
 
                 for cr_interval in diff_delta:
                     if Interval.intersection(cr_interval, common_fragment.base_interval):
+                        # it denotes that now |\varrho_max != Dnext |\varrho_max
                         common_fragment.cr_flag = False
                         common_fragment.common = None
                         terminate_flag = True
@@ -372,12 +375,6 @@ def find_periods(CR, fact=None):
             common_fragment.common.right_open = True
             return CR.D, common_fragment.common, None, None, None, None, None, None
 
-        cnt += 1
-        if fact is not None:
-            if entail(fact, CR.D):
-                print("The fact: {} is entailed".format(str(fact)))
-                exit()
-
         if common_fragment.common is None:
             # add the new facts to the dataset
             for tmp_predicate in delta_new:
@@ -399,8 +396,12 @@ def find_periods(CR, fact=None):
             coalescing_d(CR.D)
             continue
 
+        # it denotes that now |\varrho_max == Dnext |\varrho_max and \varrho_max != \emptyset and t=t_D^- \in \varrho_max,
+        # so it satisfies the while conditions in line 4 and line 12
+        # \varrho_max = [common_fragment.common.left_value, common_fragment.common.right_value]
         varrho_left_range = Interval(common_fragment.common.left_value, CR.min_x, common_fragment.common.left_open, True)
         varrho_right_range = Interval(CR.max_x, common_fragment.common.right_value, True, common_fragment.common.right_open)
+
         if varrho_left_range.left_value in [Decimal("-inf")] and varrho_right_range.right_value in [Decimal("+inf")]:
             return CR.D, common_fragment.common, None, None, None, None, None, None
 

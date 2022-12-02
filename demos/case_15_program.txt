@@ -1,0 +1,1 @@
+F:- Diamondminus[0,2]P, Q
