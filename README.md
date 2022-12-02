@@ -3,20 +3,6 @@
 This repository contains code and other related resources of our paper "Materialisation-based Reasoning in DatalogMTL with Bounded Intervals"
 published in AAAI 2023 (To appear).
 
-****
-If you find our paper and resources useful, please kindly leave a star and cite our papers. Thanks!
-
-```bibtex
-@inproceedings{aaai2023,
-  title={Materialisation-based Reasoning in DatalogMTL with Bounded Intervals},
-  author={Przemysław A. Wał˛ega , Michał Zawidzki , Dingmin Wang, Bernardo Cuenca Grau},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  year={2023}
-}
-```
-****
-
-
 <span id='overview'/>
 
 ### Overview:
