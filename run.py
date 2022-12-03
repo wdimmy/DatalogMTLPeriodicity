@@ -55,7 +55,7 @@ if __name__ == "__main__":
             for key, values in right_period.items():
                 print(str(key), [str(val) for val in values])
         else:
-            print("left period:", "(" + str(CR.base_interval.right_value), "," +  str(CR.base_interval.right_value + CR.w) + "]")
+            print("right period:", "(" + str(CR.base_interval.right_value), "," +  str(CR.base_interval.right_value + CR.w) + "]")
             print("[]")
 
     if fact is not None:
