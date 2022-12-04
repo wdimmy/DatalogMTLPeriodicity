@@ -36,6 +36,6 @@ class CanonicalRepresentation:
         print("The minimum number in the database:{}".format(self.min_x))
         self.base_interval = Interval(self.min_x, self.max_x, False, False)
         self.z, self.gcd = get_gcd(self.Program)
-        self.left_initial_ruler_intervals, self.right_initial_ruler_intervals = get_initial_ruler_intervals(self.points[:], left_border= self.min_x-self.gcd, right_border=self.max_x+self.gcd, gcd=self.gcd)
+        self.left_initial_ruler_intervals, self.right_initial_ruler_intervals, self.pattern_num, self.pattern_len = get_initial_ruler_intervals(self.points[:], left_border= self.min_x-self.w, right_border=self.max_x+self.w, gcd=self.gcd)
 
         self.left_dict, self.right_dict = construct_left_right_pattern(self.points, self.gcd)

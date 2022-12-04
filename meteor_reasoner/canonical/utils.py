@@ -130,48 +130,6 @@ def has_same_facts(ruler_intervals1, ruler_intervals2, D):
     return True
 
 
-def build_left_ruler_intervals(left_interval_range, CR):
-    big_ruler_intervals = CR.left_initial_ruler_intervals[:]
-    base_index = big_ruler_intervals.index(Interval(CR.min_x, CR.min_x, False, False))
-    starting_ruler_interval = big_ruler_intervals[base_index-2]
-    while big_ruler_intervals[0].left_value >= left_interval_range.left_value:
-        ruler_interval_len = []
-        cnt = 0
-        if big_ruler_intervals[0].left_open:
-            new_ruler_interval = Interval(big_ruler_intervals[0].left_value, big_ruler_intervals[0].left_value,
-                                          False, False)
-            if new_ruler_interval.left_value > left_interval_range.left_value:
-               big_ruler_intervals = [new_ruler_interval] + big_ruler_intervals
-               continue
-            elif new_ruler_interval.left_value == left_interval_range.left_value and new_ruler_interval.left_open == left_interval_range.left_open:
-                big_ruler_intervals = [new_ruler_interval] + big_ruler_intervals
-                continue
-            else:
-                break
-
-        for i in range(len(big_ruler_intervals)):
-            if big_ruler_intervals[i].left_open:
-                ruler_interval_len.append(
-                    str(abs(big_ruler_intervals[i].right_value - big_ruler_intervals[i].left_value)))
-                cnt += 1
-            if cnt >= len(CR.left_dict):
-                break
-        tmp_pattern = "#".join(ruler_interval_len)
-        current_the_most_left_ruler_interval = big_ruler_intervals[0]
-        next_ruler_interval_len = CR.left_dict[tmp_pattern]
-        new_ruler_interval = (Interval(current_the_most_left_ruler_interval.left_value - next_ruler_interval_len,
-                                       current_the_most_left_ruler_interval.left_value, True, True))
-        if new_ruler_interval.left_value > left_interval_range.left_value:
-            big_ruler_intervals = [new_ruler_interval] + big_ruler_intervals
-            continue
-        elif new_ruler_interval.left_value == left_interval_range.left_value and new_ruler_interval.left_open == left_interval_range.left_open:
-            big_ruler_intervals = [new_ruler_interval] + big_ruler_intervals
-            continue
-        else:
-            break
-    return big_ruler_intervals, starting_ruler_interval
-
-
 def find_left_period(D, left_interval_range, CR):
     big_ruler_intervals, starting_ruler_interval = build_left_ruler_intervals(left_interval_range, CR)
     big_ruler_intervals = big_ruler_intervals[0: big_ruler_intervals.index(starting_ruler_interval) + 1]
@@ -218,51 +176,29 @@ def find_left_period(D, left_interval_range, CR):
 
 def build_right_ruler_intervals(right_interval_range, CR):
     big_ruler_intervals = CR.right_initial_ruler_intervals[:]
-    base_index = big_ruler_intervals.index(Interval(CR.max_x, CR.max_x, False, False))
-    starting_ruler_interval = big_ruler_intervals[base_index+2]
-    while big_ruler_intervals[-1].right_value <= right_interval_range.right_value:
-        ruler_interval_len = []
-        cnt = 0
-        if big_ruler_intervals[-1].left_open:
-            new_ruler_interval = Interval(big_ruler_intervals[-1].right_value, big_ruler_intervals[-1].right_value,
-                                          False, False)
-            if new_ruler_interval.right_value < right_interval_range.right_value:
-                big_ruler_intervals = big_ruler_intervals + [new_ruler_interval]
-                continue
-            elif new_ruler_interval.right_value == right_interval_range.right_value and new_ruler_interval.right_open == right_interval_range.right_open:
-                big_ruler_intervals = big_ruler_intervals + [new_ruler_interval]
-                continue
-            else:
-                break
+    i = 0
+    next_point = (big_ruler_intervals[-1].right_value, big_ruler_intervals[-1].right_value + CR.pattern_len[i % CR.pattern_num])
+    while next_point[1] <= right_interval_range.right_value:
+        big_ruler_intervals.append(Interval(next_point[0], next_point[1], True, True))
+        big_ruler_intervals.append(Interval(next_point[1], next_point[1], False, False))
+        i += 1
+        next_point = (big_ruler_intervals[-1].right_value, big_ruler_intervals[-1].right_value + CR.pattern_len[i % CR.pattern_num])
+    return big_ruler_intervals, big_ruler_intervals[0]
 
-        for i in range(len(big_ruler_intervals) - 1, -1, -1):
-            if big_ruler_intervals[i].left_open:
-                ruler_interval_len.append(
-                    str(abs(big_ruler_intervals[i].right_value - big_ruler_intervals[i].left_value)))
-                cnt += 1
-            if cnt >= len(CR.right_dict):
-                break
 
-        tmp_pattern = "#".join(ruler_interval_len)
-        current_the_most_right_ruler_interval = big_ruler_intervals[-1]
-        next_ruler_interval_len = CR.right_dict[tmp_pattern]
-        new_ruler_interval = (Interval(current_the_most_right_ruler_interval.right_value,
-                                       current_the_most_right_ruler_interval.right_value + next_ruler_interval_len,
-                                       True, True))
-        if new_ruler_interval.right_value < right_interval_range.right_value:
-            big_ruler_intervals = big_ruler_intervals + [new_ruler_interval]
-        elif new_ruler_interval.right_value == right_interval_range.right_value and \
-                new_ruler_interval.right_open == right_interval_range.right_open:
-            big_ruler_intervals = big_ruler_intervals + [new_ruler_interval]
-        elif new_ruler_interval.right_value == right_interval_range.right_value and not right_interval_range.right_open:
-            big_ruler_intervals = big_ruler_intervals + [new_ruler_interval]
-        else:
-            break
-    return big_ruler_intervals, starting_ruler_interval
+def build_left_ruler_intervals(left_interval_range, CR):
+    big_ruler_intervals = CR.left_initial_ruler_intervals[:]
+    i = 0
+    next_point = (big_ruler_intervals[0].left_value, big_ruler_intervals[0].left_value - CR.pattern_len[::-1][i % CR.pattern_num])
+    while next_point[1] >= left_interval_range.right_value:
+        big_ruler_intervals = [Interval(next_point[1], next_point[0], True,  True)] + big_ruler_intervals
+        big_ruler_intervals = [Interval(next_point[1], next_point[1], False, False)] + big_ruler_intervals
+        i += 1
+        next_point = (big_ruler_intervals[0].left_value, big_ruler_intervals[0].left_value - CR.pattern_len[::-1][i % CR.pattern_num])
+    return big_ruler_intervals, big_ruler_intervals[-1]
 
 
 def find_right_period(D, right_interval_range, CR):
-
     big_ruler_intervals,  starting_ruler_interval = build_right_ruler_intervals(right_interval_range, CR)
     big_ruler_intervals = big_ruler_intervals[big_ruler_intervals.index(starting_ruler_interval):]
     len_big_ruler_intervals = len(big_ruler_intervals)
@@ -375,7 +311,7 @@ def find_periods(CR):
             common_fragment.common.right_open = True
             return CR.D, common_fragment.common, None, None, None, None, None, None
 
-        if common_fragment.common is None:
+        if common_fragment.common is None or abs(CR.min_x - common_fragment.common.left_value) <= 2 * CR.w or abs(common_fragment.common.right_value - CR.max_x) <= 2 * CR.w:
             # add the new facts to the dataset
             for tmp_predicate in delta_new:
                 for tmp_entity in delta_new[tmp_predicate]:
@@ -399,8 +335,8 @@ def find_periods(CR):
         # it denotes that now |\varrho_max == Dnext |\varrho_max and \varrho_max != \emptyset and t=t_D^- \in \varrho_max,
         # so it satisfies the while conditions in line 4 and line 12
         # \varrho_max = [common_fragment.common.left_value, common_fragment.common.right_value]
-        varrho_left_range = Interval(common_fragment.common.left_value, CR.min_x, common_fragment.common.left_open, True)
-        varrho_right_range = Interval(CR.max_x, common_fragment.common.right_value, True, common_fragment.common.right_open)
+        varrho_left_range = Interval(common_fragment.common.left_value, CR.min_x, common_fragment.common.left_open, False)
+        varrho_right_range = Interval(CR.max_x, common_fragment.common.right_value, False, common_fragment.common.right_open)
 
         if varrho_left_range.left_value in [Decimal("-inf")] and varrho_right_range.right_value in [Decimal("+inf")]:
             return CR.D, common_fragment.common, None, None, None, None, None, None
